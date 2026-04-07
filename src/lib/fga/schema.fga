@@ -1,0 +1,31 @@
+model
+  schema 1.1
+
+type user
+
+type medical_record
+  relations
+    define owner: [user]
+    define viewer: [user, user:*]
+    define can_view: owner or viewer
+
+type prescription
+  relations
+    define owner: [user]
+    define can_view: owner
+
+type claim
+  relations
+    define owner: [user]
+    define can_view: owner
+
+type health_document
+  relations
+    define owner: [user]
+    define viewer: [user, user:*]
+    define can_view: owner or viewer
+
+type appointment
+  relations
+    define owner: [user]
+    define can_view: owner
