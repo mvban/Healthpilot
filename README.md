@@ -1,79 +1,106 @@
-# Assistant0: An AI Personal Assistant Secured with Auth0 - LangGraph TypeScript Version
+# HealthPilot: Secure AI Health Agent
 
-Assistant0 an AI personal assistant that consolidates your digital life by dynamically accessing multiple tools to help you stay organized and efficient.
+A production-ready AI health agent that coordinates patient care across MyChart (Epic), CVS Pharmacy, and Cigna Insurance using natural language — with enterprise-grade security backed by Auth0 for AI Agents.
 
-![Architecture](./public/images/arch-bg.png)
+![HealthPilot Architecture](./public/images/arch-bg.png)
 
-## About the template
+## About HealthPilot
 
-This template scaffolds an Auth0 + LangChain.js + Next.js starter app. It mainly uses the following libraries:
+Healthcare is the highest-stakes domain for AI agents. A coding assistant that hallucinates is annoying. An AI health agent that leaks your lab results to the wrong person, requests a prescription refill without your knowledge, or shares your cardiac records with an unauthorized provider is a HIPAA violation, a safety incident, and a trust catastrophe.
 
-- [LangChain's JavaScript framework](https://js.langchain.com/docs/introduction/) and [LangGraph.js](https://langchain-ai.github.io/langgraphjs/) for building agentic workflows.
-- The [Auth0 AI SDK](https://github.com/auth0/auth0-ai-js) and [Auth0 Next.js SDK](https://github.com/auth0/nextjs-auth0) to secure the application and call third-party APIs.
-- [Auth0 FGA](https://auth0.com/fine-grained-authorization) to define fine-grained access control policies for your tools and RAG pipelines.
-- Postgres with [Drizzle ORM](https://orm.drizzle.team/) and [pgvector](https://github.com/pgvector/pgvector) to store the documents and embeddings.
+HealthPilot demonstrates what responsible AI healthcare actually looks like. Every Auth0 for AI Agents feature is exercised with genuine, high-stakes justification:
 
-It's Vercel's free-tier friendly too! Check out the [bundle size stats below](#-bundle-size).
+- **Token Vault** — Agent accesses Epic, CVS, Cigna via short-lived OAuth tokens, never touching credentials
+- **CIBA** — Patient must explicitly approve every prescription refill and appointment booking
+- **FGA** — Document-level access control enforces permissions at retrieval time
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/oktadev/auth0-assistant0)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Foktadev%2Fauth0-assistant0)
+## Security Architecture
+
+| Layer           | Protection                                                      |
+| --------------- | --------------------------------------------------------------- |
+| **Credentials** | Stored in Auth0 Token Vault, never in agent code                |
+| **Actions**     | CIBA requires phone-based approval for consequential operations |
+| **Data Access** | FGA filters documents before they reach the LLM                 |
+
+This template uses:
+
+- [LangGraph.js](https://langchain-ai.github.io/langgraphjs/) for agentic workflows
+- [Auth0 for AI Agents](https://auth0.com/ai) (Token Vault, CIBA, FGA)
+- [Auth0 Next.js SDK](https://github.com/auth0/nextjs-auth0) for authentication
+- [Next.js 15](https://nextjs.org/) with App Router
+
+## Features
+
+### Healthcare Tools
+
+- **MyChart** — Medical records, lab results, appointments
+- **CVS Pharmacy** — Prescriptions, refills, pharmacy locations
+- **Cigna Insurance** — Coverage details, claims, eligibility
+- **Health Documents** — FGA-filtered document retrieval
+
+### Security Features
+
+- Token Vault connections for credential-less API access
+- CIBA async authorization for prescription refills and appointments
+- FGA-enabled RAG with retrieval-layer filtering
 
 ## 🚀 Getting Started
 
-First, clone this repo and download it locally.
+Clone the repository:
 
 ```bash
 git clone https://github.com/auth0-samples/auth0-assistant0.git
 cd auth0-assistant0/ts-langchain
 ```
 
-Next, you'll need to set up environment variables in your repo's `.env.local` file. Copy the `.env.example` file to `.env.local`.
+Set up environment variables. Copy `.env.example` to `.env.local` and add:
 
-To start with the basic examples, you'll just need to add your OpenAI API key and Auth0 credentials.
+- **Auth0** — Domain, client ID, client secret for Token Vault
+- **OpenAI** — API key for GPT-4o-mini
+- **Auth0 FGA** — Store ID, client ID, client secret, API URL
 
-- To start with the examples, you'll just need to add your OpenAI API key and Auth0 credentials for the Web app and Machine to Machine App.
-  - You can set up a new Auth0 tenant with an Auth0 Web App and Token Vault following the Prerequisites instructions [here](https://auth0.com/ai/docs/get-started/call-others-apis-on-users-behalf).
-  - An Auth0 FGA account, you can create one [here](https://dashboard.fga.dev). Add the FGA store ID, client ID, client secret, and API URL to the `.env.local` file.
-  - Optionally add a [SerpAPI](https://serpapi.com/) API key for using web search tool.
+See the [Prerequisites](https://auth0.com/ai/docs/get-started/call-others-apis-on-users-behalf) for setting up Auth0.
 
-Next, install the required packages using your preferred package manager and initialize the database.
+Install dependencies and start services:
 
 ```bash
-npm install # or bun install
-# start the postgres database
+npm install
+# Start PostgreSQL
 docker compose up -d
-# create the database schema
-npm run db:migrate # or bun db:migrate
-# initialize FGA store
-npm run fga:init # or bun fga:init
+# Create database schema
+npm run db:migrate
+# Initialize FGA store
+npm run fga:init
 ```
 
-Now you're ready to run the development server:
+Run the development server:
 
 ```bash
-npm run all:dev # or bun all:dev
+npm run all:dev
 ```
 
-This will start an in-memory LangGraph server on port 54367 and a Next.js server on port 3000. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result! Ask the bot something and you'll see a streamed response:
+Open [http://localhost:3000](http://localhost:3000) to try HealthPilot.
 
-![A streaming conversation between the user and the AI](./public/images/home-page.png)
+## Example Queries
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- "Show me my prescriptions"
+- "Refill my Lisinopril" (triggers CIBA)
+- "Book a cardiology appointment" (triggers CIBA)
+- "What's my deductible?"
+- "Show my recent lab results"
 
-Agent configuration lives in `src/lib/agent.ts`. From here, you can change the prompt and model, or add other tools and logic.
+## Documentation
 
-## 📦 Bundle size
-
-This package has [@next/bundle-analyzer](https://www.npmjs.com/package/@next/bundle-analyzer) set up by default - you can explore the bundle size interactively by running:
-
-```bash
-$ ANALYZE=true npm run build
-```
+- [Auth0 for AI Agents](https://auth0.com/ai/docs/)
+- [Token Vault](https://auth0.com/features/token-vault)
+- [CIBA / Async Authorization](https://auth0.com/ai/docs/intro/asynchronous-authorization)
+- [Auth0 FGA](https://auth0.com/fine-grained-authorization)
+- [LangGraph.js](https://langchain-ai.github.io/langgraphjs/)
 
 ## License
 
-This project is open-sourced under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License — see the [LICENSE](LICENSE) file for details.
 
 ## Author
 
-This project is built by [Deepu K Sasidharan](https://github.com/deepu105).
+Built with Auth0 for AI Agents, LangGraph.js, and Next.js.
